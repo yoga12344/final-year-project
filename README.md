@@ -5,6 +5,8 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-orange.svg)](https://pytorch.org)
 [![Flower](https://img.shields.io/badge/Flower-1.6%2B-purple.svg)](https://flower.dev)
 
+**Final Year Project** - A comprehensive implementation of AI-driven access control for cloud security.
+
 ---
 
 ## 🔐 Overview
