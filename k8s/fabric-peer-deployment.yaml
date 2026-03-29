@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fabric-peer
+  namespace: dr-tbac-zt
+  labels:
+    app: fabric-peer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fabric-peer
+  template:
+    metadata:
+      labels:
+        app: fabric-peer
+    spec:
+      containers:
+      - name: fabric-peer
+        image: dr-tbac-zt/fabric:latest
+        ports:
+        - containerPort: 7051   # Peer gRPC
+        - containerPort: 7052   # Chaincode listening
+        - containerPort: 9443   # Operations REST
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "2"
+            memory: "4Gi"
+        env:
+        - name: CORE_PEER_ID
+          value: "peer0.org1.tbaczt.com"
+        - name: CORE_PEER_LISTENADDRESS
+          value: "0.0.0.0:7051"
+        - name: CORE_PEER_CHAINCODEADDRESS
+          value: "fabric-peer-svc:7052"
+        - name: CORE_LEDGER_STATE_STATEDATABASE
+          value: "CouchDB"
+        - name: CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS
+          value: "couchdb-svc:5984"
+        volumeMounts:
+        - name: fabric-vol
+          mountPath: /var/hyperledger
+      volumes:
+      - name: fabric-vol
+        persistentVolumeClaim:
+          claimName: fabric-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fabric-peer-svc
+  namespace: dr-tbac-zt
+spec:
+  selector:
+    app: fabric-peer
+  ports:
+  - name: grpc
+    port: 7051
+    targetPort: 7051
+  - name: chaincode
+    port: 7052
+    targetPort: 7052
+  - name: ops
+    port: 9443
+    targetPort: 9443
+  type: ClusterIP

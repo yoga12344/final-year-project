@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # Inference Engine (FastAPI)
+  inference-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    environment:
+      - LOG_LEVEL=INFO
+    networks:
+      - zt-network
+
+  # XAI Dashboard (Streamlit)
+  dashboard:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dashboard
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    depends_on:
+      - inference-api
+    networks:
+      - zt-network
+
+networks:
+  zt-network:
+    driver: bridge

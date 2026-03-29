@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dqn-agent
+  namespace: dr-tbac-zt
+  labels:
+    app: dqn-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dqn-agent
+  template:
+    metadata:
+      labels:
+        app: dqn-agent
+    spec:
+      containers:
+      - name: dqn-agent
+        image: dr-tbac-zt/dqn:latest
+        ports:
+        - containerPort: 8001
+        resources:
+          requests:
+            cpu: "1"
+            memory: "1Gi"
+          limits:
+            cpu: "4"
+            memory: "4Gi"
+        env:
+        - name: POLICY_FILE
+          value: "/config/policy.json"
+        - name: DQN_MODEL_PATH
+          value: "/models/dqn_best.pt"
+        volumeMounts:
+        - name: models-vol
+          mountPath: /models
+        - name: policy-vol
+          mountPath: /config
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 30
+          periodSeconds: 15
+      volumes:
+      - name: models-vol
+        persistentVolumeClaim:
+          claimName: models-pvc
+      - name: policy-vol
+        configMap:
+          name: policy-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dqn-agent-svc
+  namespace: dr-tbac-zt
+spec:
+  selector:
+    app: dqn-agent
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8001
+  type: ClusterIP

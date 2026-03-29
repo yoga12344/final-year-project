@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: federated-server
+  namespace: dr-tbac-zt
+  labels:
+    app: federated-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: federated-server
+  template:
+    metadata:
+      labels:
+        app: federated-server
+    spec:
+      containers:
+      - name: flower-server
+        image: dr-tbac-zt/flower:latest
+        ports:
+        - containerPort: 8080   # gRPC Flower port
+        - containerPort: 8443   # HTTPS metrics
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "4"
+            memory: "8Gi"
+        env:
+        - name: FL_ROUNDS
+          value: "100"
+        - name: FL_MIN_CLIENTS
+          value: "3"
+        - name: MODEL_PATH
+          value: "/models/lstm_global.pth"
+        volumeMounts:
+        - name: models-vol
+          mountPath: /models
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 20
+      volumes:
+      - name: models-vol
+        persistentVolumeClaim:
+          claimName: models-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: federated-server-svc
+  namespace: dr-tbac-zt
+spec:
+  selector:
+    app: federated-server
+  ports:
+  - name: grpc
+    protocol: TCP
+    port: 8080
+    targetPort: 8080
+  - name: https
+    protocol: TCP
+    port: 443
+    targetPort: 8443
+  type: ClusterIP

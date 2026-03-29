@@ -1,0 +1,17 @@
+# Hyperledger Fabric Peer + Chaincode Docker image
+FROM hyperledger/fabric-peer:2.5 AS fabric-base
+
+# Install Go (for chaincode build)
+FROM golang:1.21 AS chaincode-builder
+WORKDIR /chaincode
+COPY src/blockchain/chaincode/ .
+RUN go mod init access_log && \
+    go get github.com/hyperledger/fabric-contract-api-go/contractapi && \
+    go build -o access_log_cc .
+
+# Final image – Fabric peer with compiled chaincode
+FROM hyperledger/fabric-peer:2.5
+COPY --from=chaincode-builder /chaincode/access_log_cc /usr/local/bin/
+COPY blockchain/fabric-network/ /fabric-network/
+
+EXPOSE 7051 7052 9443

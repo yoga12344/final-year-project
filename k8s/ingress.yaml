@@ -1,0 +1,41 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dr-tbac-zt-ingress
+  namespace: dr-tbac-zt
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - tbaczt.example.com
+    secretName: dr-tbac-zt-tls
+  rules:
+  - host: tbaczt.example.com
+    http:
+      paths:
+      - path: /trust
+        pathType: Prefix
+        backend:
+          service:
+            name: trust-assessment-svc
+            port:
+              number: 80
+      - path: /policy
+        pathType: Prefix
+        backend:
+          service:
+            name: dqn-agent-svc
+            port:
+              number: 80
+      - path: /fl
+        pathType: Prefix
+        backend:
+          service:
+            name: federated-server-svc
+            port:
+              number: 8080

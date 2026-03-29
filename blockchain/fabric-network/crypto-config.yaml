@@ -1,0 +1,28 @@
+################################################################################
+# Hyperledger Fabric crypto-config.yaml
+# Generates cryptographic material for the DR-TBAC-ZT Access Log Network
+# Run: cryptogen generate --config=./crypto-config.yaml
+################################################################################
+
+OrdererOrgs:
+  - Name: Orderer
+    Domain: tbaczt.com
+    Specs:
+      - Hostname: orderer
+
+PeerOrgs:
+  - Name: Org1
+    Domain: org1.tbaczt.com
+    EnableNodeOUs: true
+    Template:
+      Count: 2        # peer0, peer1
+    Users:
+      Count: 2        # User1, User2 (Admin is auto-generated)
+
+  - Name: Org2
+    Domain: org2.tbaczt.com
+    EnableNodeOUs: true
+    Template:
+      Count: 2
+    Users:
+      Count: 2

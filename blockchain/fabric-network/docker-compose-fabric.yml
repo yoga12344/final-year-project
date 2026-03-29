@@ -1,0 +1,176 @@
+version: "3.8"
+
+networks:
+  fabric-net:
+    name: fabric-net
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Certificate Authority — Org1
+  # ---------------------------------------------------------------------------
+  ca-org1:
+    image: hyperledger/fabric-ca:1.5
+    environment:
+      FABRIC_CA_HOME: /etc/hyperledger/fabric-ca-server
+      FABRIC_CA_SERVER_CA_NAME: ca-org1
+      FABRIC_CA_SERVER_TLS_ENABLED: "true"
+    ports:
+      - "7054:7054"
+    volumes:
+      - ./crypto-config/peerOrganizations/org1.tbaczt.com/ca:/etc/hyperledger/fabric-ca-server
+    networks:
+      - fabric-net
+
+  # ---------------------------------------------------------------------------
+  # Certificate Authority — Org2
+  # ---------------------------------------------------------------------------
+  ca-org2:
+    image: hyperledger/fabric-ca:1.5
+    environment:
+      FABRIC_CA_HOME: /etc/hyperledger/fabric-ca-server
+      FABRIC_CA_SERVER_CA_NAME: ca-org2
+      FABRIC_CA_SERVER_TLS_ENABLED: "true"
+    ports:
+      - "8054:7054"
+    volumes:
+      - ./crypto-config/peerOrganizations/org2.tbaczt.com/ca:/etc/hyperledger/fabric-ca-server
+    networks:
+      - fabric-net
+
+  # ---------------------------------------------------------------------------
+  # Orderer — Raft single-node
+  # ---------------------------------------------------------------------------
+  orderer:
+    image: hyperledger/fabric-orderer:2.5
+    environment:
+      FABRIC_LOGGING_SPEC: INFO
+      ORDERER_GENERAL_LISTENADDRESS: "0.0.0.0"
+      ORDERER_GENERAL_LISTENPORT: "7050"
+      ORDERER_GENERAL_TLS_ENABLED: "true"
+      ORDERER_GENERAL_TLS_PRIVATEKEY: /var/hyperledger/orderer/tls/server.key
+      ORDERER_GENERAL_TLS_CERTIFICATE: /var/hyperledger/orderer/tls/server.crt
+      ORDERER_GENERAL_TLS_ROOTCAS: "[/var/hyperledger/orderer/tls/ca.crt]"
+      ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE: /var/hyperledger/orderer/tls/server.crt
+      ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY: /var/hyperledger/orderer/tls/server.key
+      ORDERER_GENERAL_BOOTSTRAPMETHOD: none
+      ORDERER_CHANNELPARTICIPATION_ENABLED: "true"
+      ORDERER_ADMIN_LISTENADDRESS: "0.0.0.0:7053"
+    ports:
+      - "7050:7050"
+      - "7053:7053"
+    volumes:
+      - ./crypto-config/ordererOrganizations/tbaczt.com/orderers/orderer.tbaczt.com:/var/hyperledger/orderer
+      - ./channel-artifacts:/var/hyperledger/production/orderer
+    networks:
+      - fabric-net
+
+  # ---------------------------------------------------------------------------
+  # CouchDB for Org1 Peer0
+  # ---------------------------------------------------------------------------
+  couchdb0:
+    image: couchdb:3.3
+    environment:
+      COUCHDB_USER: admin
+      COUCHDB_PASSWORD: adminpw
+    ports:
+      - "5984:5984"
+    networks:
+      - fabric-net
+
+  # ---------------------------------------------------------------------------
+  # Peer0 — Org1
+  # ---------------------------------------------------------------------------
+  peer0-org1:
+    image: hyperledger/fabric-peer:2.5
+    environment:
+      CORE_VM_ENDPOINT: unix:///host/var/run/docker.sock
+      CORE_PEER_ID: peer0.org1.tbaczt.com
+      CORE_PEER_ADDRESS: peer0-org1:7051
+      CORE_PEER_LISTENADDRESS: "0.0.0.0:7051"
+      CORE_PEER_GOSSIP_BOOTSTRAP: peer0-org1:7051
+      CORE_PEER_GOSSIP_EXTERNALENDPOINT: peer0-org1:7051
+      CORE_PEER_LOCALMSPID: Org1MSP
+      CORE_PEER_TLS_ENABLED: "true"
+      CORE_PEER_TLS_CERT_FILE: /etc/hyperledger/fabric/tls/server.crt
+      CORE_PEER_TLS_KEY_FILE: /etc/hyperledger/fabric/tls/server.key
+      CORE_PEER_TLS_ROOTCERT_FILE: /etc/hyperledger/fabric/tls/ca.crt
+      CORE_LEDGER_STATE_STATEDATABASE: CouchDB
+      CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS: couchdb0:5984
+      CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME: admin
+      CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD: adminpw
+    ports:
+      - "7051:7051"
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ./crypto-config/peerOrganizations/org1.tbaczt.com/peers/peer0.org1.tbaczt.com:/etc/hyperledger/fabric
+    depends_on:
+      - couchdb0
+      - orderer
+    networks:
+      - fabric-net
+
+  # ---------------------------------------------------------------------------
+  # Peer0 — Org2
+  # ---------------------------------------------------------------------------
+  couchdb1:
+    image: couchdb:3.3
+    environment:
+      COUCHDB_USER: admin
+      COUCHDB_PASSWORD: adminpw
+    ports:
+      - "6984:5984"
+    networks:
+      - fabric-net
+
+  peer0-org2:
+    image: hyperledger/fabric-peer:2.5
+    environment:
+      CORE_VM_ENDPOINT: unix:///host/var/run/docker.sock
+      CORE_PEER_ID: peer0.org2.tbaczt.com
+      CORE_PEER_ADDRESS: peer0-org2:7051
+      CORE_PEER_LISTENADDRESS: "0.0.0.0:7051"
+      CORE_PEER_GOSSIP_BOOTSTRAP: peer0-org2:7051
+      CORE_PEER_GOSSIP_EXTERNALENDPOINT: peer0-org2:7051
+      CORE_PEER_LOCALMSPID: Org2MSP
+      CORE_PEER_TLS_ENABLED: "true"
+      CORE_PEER_TLS_CERT_FILE: /etc/hyperledger/fabric/tls/server.crt
+      CORE_PEER_TLS_KEY_FILE: /etc/hyperledger/fabric/tls/server.key
+      CORE_PEER_TLS_ROOTCERT_FILE: /etc/hyperledger/fabric/tls/ca.crt
+      CORE_LEDGER_STATE_STATEDATABASE: CouchDB
+      CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS: couchdb1:5984
+      CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME: admin
+      CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD: adminpw
+    ports:
+      - "8051:7051"
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ./crypto-config/peerOrganizations/org2.tbaczt.com/peers/peer0.org2.tbaczt.com:/etc/hyperledger/fabric
+    depends_on:
+      - couchdb1
+      - orderer
+    networks:
+      - fabric-net
+
+  # ---------------------------------------------------------------------------
+  # Fabric CLI (for channel / chaincode admin tasks)
+  # ---------------------------------------------------------------------------
+  cli:
+    image: hyperledger/fabric-tools:2.5
+    tty: true
+    stdin_open: true
+    environment:
+      CORE_VM_ENDPOINT: unix:///host/var/run/docker.sock
+      GOPATH: /opt/gopath
+      CORE_LOGGING_LEVEL: INFO
+      CORE_PEER_ID: cli
+      CORE_PEER_ADDRESS: peer0-org1:7051
+      CORE_PEER_LOCALMSPID: Org1MSP
+      CORE_PEER_TLS_ENABLED: "true"
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto
+      - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+      - ../../src/blockchain/chaincode:/opt/gopath/src/github.com/chaincode
+    networks:
+      - fabric-net

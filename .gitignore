@@ -1,0 +1,113 @@
+# =============================================================================
+# DR-TBAC-ZT++ .gitignore
+# =============================================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Conda
+.conda/
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# PyTorch / Models (store in cloud/DVC)
+models/*.pth
+models/*.pt
+models/*.zip
+models/*.pkl
+!models/.gitkeep
+
+# Data (never commit raw data)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Results
+experiments/results/*.csv
+experiments/results/*.png
+experiments/results/*.pdf
+!experiments/results/.gitkeep
+
+# Hyperledger Fabric generated artifacts
+blockchain/fabric-network/channel-artifacts/*
+blockchain/fabric-network/crypto-config/*
+!blockchain/fabric-network/channel-artifacts/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Docker
+.docker/
+
+# Secrets & Credentials
+*.pem
+*.key
+*.crt
+*.pfx
+secrets/
+.env.local
+.env.production
+openstack-rc.sh
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Sphinx documentation
+docs/_build/
+
+# Demo screenshots (large files)
+demo/screenshots/*.png
+demo/screenshots/*.mp4

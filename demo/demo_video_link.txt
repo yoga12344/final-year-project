@@ -1,0 +1,24 @@
+## DR-TBAC-ZT++ Demo Video
+
+A full system demonstration video is available at:
+
+**📹 [Watch Demo on YouTube / Google Drive]**
+
+> Link will be added after recording.
+
+### What the Demo Covers
+
+1. **System startup** – docker-compose bringing up all services
+2. **Real-time trust scoring** – LSTM processing OpenStack log stream
+3. **DQN policy adaptation** – watch `policy.json` update live during an
+   attack simulation (user "mallory" triggers anomaly → DENY + isolation)
+4. **Federated Learning round** – multiple simulated clients aggregating
+   model updates through the Flower server
+5. **Blockchain audit trail** – querying the Fabric ledger for immutable
+   decision records
+6. **Dashboard visualisations** – ROC curve, trust score timeline,
+   decision distribution charts
+
+### Screenshots
+
+Screenshots are in the `demo/screenshots/` directory.

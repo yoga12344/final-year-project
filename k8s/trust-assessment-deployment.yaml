@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trust-assessment
+  namespace: dr-tbac-zt
+  labels:
+    app: trust-assessment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: trust-assessment
+  template:
+    metadata:
+      labels:
+        app: trust-assessment
+    spec:
+      containers:
+      - name: trust-assessment
+        image: dr-tbac-zt/trust:latest
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+          limits:
+            cpu: "2"
+            memory: "2Gi"
+        env:
+        - name: KAFKA_BOOTSTRAP
+          valueFrom:
+            secretKeyRef:
+              name: dr-tbac-secrets
+              key: kafka_bootstrap
+        - name: MODEL_PATH
+          value: "/models/lstm_global.pth"
+        volumeMounts:
+        - name: models-vol
+          mountPath: /models
+          readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      volumes:
+      - name: models-vol
+        persistentVolumeClaim:
+          claimName: models-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trust-assessment-svc
+  namespace: dr-tbac-zt
+spec:
+  selector:
+    app: trust-assessment
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8000
+  type: ClusterIP

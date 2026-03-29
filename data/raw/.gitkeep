@@ -1,0 +1,2 @@
+# data/raw/ — Raw OpenStack log files (never committed to git)
+# Place your raw .log / .csv files here before running the preprocessor.
