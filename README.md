@@ -106,21 +106,37 @@ bash scripts/run_online_evaluation.sh
 ## 📂 Project Structure
 
 ```
-dr-tbac-zt-plus-plus/
-├── src/
-│   ├── trust_assessment/    # Bi-LSTM model for trust scoring
-│   ├── federated_learning/  # Flower federated training
-│   ├── rl_agent/            # DQN dynamic rule engine
-│   ├── access_control/      # PDP + OpenStack policy
-│   ├── blockchain/          # Hyperledger Fabric SDK
-│   └── utils/               # Logging, metrics, visualization
-├── blockchain/              # Fabric network config & chaincode
-├── experiments/notebooks/   # Jupyter experiment notebooks
-├── k8s/                     # Kubernetes production manifests
-├── deployment/              # Dockerfiles & Helm charts
+final-year-project/
+├── api/                     # FastAPI REST API for trust assessment
+├── blockchain/              # Hyperledger Fabric network & chaincode
+│   └── fabric-network/      # Fabric config, crypto, scripts
+├── config/                  # Configuration files
+├── data/                    # Datasets (raw, processed, sample logs)
+├── demo/                    # Demo videos & screenshots
+├── deployment/              # Docker & Helm deployment configs
+├── docs/                    # Documentation (API, architecture, etc.)
+├── experiments/             # Experiment results & notebooks
+├── k8s/                     # Kubernetes manifests
+├── logs/                    # Application logs
+├── models/                  # Trained models (LSTM, DQN)
+├── scripts/                 # Shell scripts for training & deployment
+├── src/                     # Source code
+│   ├── access_control/      # PDP engine & policy management
+│   ├── blockchain/          # Fabric SDK integration
+│   ├── explainability/      # SHAP explainers
+│   ├── federated_learning/  # Flower client/server
+│   ├── rl_agent/            # DQN agent & environment
+│   ├── trust_assessment/    # LSTM model & preprocessor
+│   └── utils/               # Shared utilities
 ├── tests/                   # Unit & integration tests
-├── docs/                    # Architecture & API documentation
-└── scripts/                 # Training & deployment shell scripts
+├── app.py                   # Main application entry
+├── dashboard.py             # Streamlit dashboard
+├── run_pipeline.py          # Pipeline runner
+├── streamlit_app.py         # Streamlit app
+├── requirements.txt         # Python dependencies
+├── environment.yml          # Conda environment
+├── docker-compose.yml       # Docker Compose setup
+└── README.md                # This file
 ```
 
 ---
